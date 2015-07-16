@@ -1,0 +1,15 @@
+{
+  "name": "push-api-nodejs-demo",
+  "version": "0.1.0",
+  "description": "Simple Push API demo using Node.js",
+  "author": "John Mellor <johnme@google.com>",
+  "license": "Apache-2.0",
+  "private": true,
+  "engines": {
+    "node": "^0.12.7"
+  },
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
