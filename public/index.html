@@ -3,8 +3,21 @@
 <head>
   <meta charset="utf-8">
   <title>Push API demo</title>
+  <meta name="viewport" content="initial-scale=1">
+  <script defer src="index.js"></script>
+  <style>
+    #error {
+      display: none;
+      background: red;
+      color: white;
+    }
+  </style>
 </head>
 <body>
   <h1>Push API demo using IETF webpush</h1>
+  <p id="error"></p>
+  <section id="subscribe">
+    <button disabled>Subscribe</button>
+  </section>
 </body>
 </html>
