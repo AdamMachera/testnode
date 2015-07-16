@@ -1,0 +1,7 @@
+node_modules/
+
+npm-debug.log
+
+# foreman local environment variables
+# https://devcenter.heroku.com/articles/config-vars
+.env
