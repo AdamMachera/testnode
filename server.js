@@ -35,8 +35,12 @@ app.post('/send', jsonParser, function(req, res) {
             body: req.body.body
         }), 'utf8')
     });
+    // HACK: Chrome currently gives us the wrong endpoint for webpush.
+    GCM_WEBPUSH_PREFIX = 'https://jmt17.google.com/gcm/demo-webpush-00/';
+    var endpoint = req.body.endpoint.replace(
+            'https://android.googleapis.com/gcm/send/', GCM_WEBPUSH_PREFIX);
     var requestOptions = {
-        url: req.body.endpoint,
+        url: endpoint,
         headers: {
             'Encryption': util.format('salt="%s"; rs=%s',
                                       encrypted.salt.toString('base64'),
@@ -50,7 +54,7 @@ app.post('/send', jsonParser, function(req, res) {
     // Google Cloud Messaging requires proof that the sender is authorized to
     // use the endpoint (i.e. that they hold the secret API key that corresponds
     // to the Sender ID given when subscribing on the client).
-    if (/^https:\/\/[-\w]+\.google(apis)?\.com\//.test(req.body.endpoint)) {
+    if (endpoint.indexOf(GCM_WEBPUSH_PREFIX) === 0) {
         requestOptions.headers.Authorization = 'key=' + process.env.GCM_API_KEY;
     }
     request.post(requestOptions, function(error, response, body) {
