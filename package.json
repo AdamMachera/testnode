@@ -11,6 +11,8 @@
   "dependencies": {
     "body-parser": "^1.13.2",
     "express": "^4.13.1",
+    "node-web-push": "git://github.com/beverloo/node-web-push.git",
+    "request": "^2.58.0"
   },
   "main": "server.js",
   "scripts": {
