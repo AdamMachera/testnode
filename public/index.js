@@ -50,6 +50,7 @@ function subscribeForPush() {
         });
     });
 }
+
 function lookForExistingSubscription() {
     if (Notification.permission != 'granted')
         return;
@@ -68,4 +69,34 @@ function setPushSubscription(ps) {
     pushSubscription = ps;
     console.log(ps);
     $('#subscribe').style.display = 'none';
+    $('#send').style.display = 'block';
 }
+
+$('#send > form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    console.log("Sending message to " + location.hostname + "...");
+    $('#error').style.display = 'none';
+
+    var data = {
+        endpoint: pushSubscription.endpoint,
+        curve25519dh: btoa(String.fromCharCode.apply(
+                null, new Uint8Array(pushSubscription.curve25519dh))),
+        title: $('#notification-title').value,
+        body: $('#notification-body').value
+    };
+
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        if (('' + xhr.status)[0] != '2') {
+            error("Server error " + xhr.status + ": " + xhr.statusText);
+        } else {
+            console.log("Sent successfully :)");
+        }
+    };
+    xhr.onerror = xhr.onabort = function() {
+        error("Failed to send message to server!");
+    };
+    xhr.open('POST', '/send');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify(data));
+});

@@ -1,0 +1,22 @@
+#error {
+	display: none;
+	background: red;
+	color: white;
+}
+
+#send {
+	display: none;
+}
+
+form {
+	display: table;
+	border-collapse: separate;
+	border-spacing: 5px;
+}
+form > * {
+	display: table-row;
+}
+form > * > * {
+	display: table-cell;
+	vertical-align: middle;
+}

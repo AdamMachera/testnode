@@ -4,21 +4,26 @@
   <meta charset="utf-8">
   <title>Push API demo</title>
   <meta name="viewport" content="initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="index.css">
   <script defer src="index.js"></script>
   <link rel="manifest" href="manifest.json">
-  <style>
-    #error {
-      display: none;
-      background: red;
-      color: white;
-    }
-  </style>
 </head>
 <body>
   <h1>Push API demo using IETF webpush</h1>
   <p id="error"></p>
   <section id="subscribe">
+    <h2>Subscribe for push notifications</h2>
     <button disabled>Subscribe</button>
+  </section>
+  <section id="send">
+    <h2>Send yourself a notification</h2>
+    <form>
+      <input type="hidden" id="endpoint">
+      <input type="hidden" id="curve25519dh">
+      <label><span>Title</span><input type="text" id="notification-title" value="My Notification"></label>
+      <label><span>Body</span><input type="text" id="notification-body" value="Lorem ipsum dolor sit amet"></label>
+      <button>Send</button>
+    </form>
   </section>
 </body>
 </html>
