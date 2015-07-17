@@ -1,5 +1,7 @@
 $ = document.querySelector.bind(document);
 
+var pushSubscription = null;
+
 function error(str) {
     str = "Error: " + str;
     $('#error').textContent = str;
@@ -21,6 +23,7 @@ if (!navigator.serviceWorker) {
         error("Failed to register Service Worker: " + reason);
         $('#subscribe > button').disabled = true; // Unrecoverable error.
     });
+    lookForExistingSubscription();
 }
 
 function onClickSubscribe() {
@@ -40,11 +43,29 @@ function onClickSubscribe() {
 function subscribeForPush() {
     navigator.serviceWorker.ready.then(function(swr) {
         swr.pushManager.subscribe({userVisibleOnly: true}).then(function(ps) {
-            $('#subscribe').style.display = 'none';
-            console.log(JSON.stringify(ps));
+            setPushSubscription(ps);
         }, function(reason) {
             error("Failed to subscribe for Push: " + reason);
             $('#subscribe > button').disabled = false;
         });
     });
+}
+function lookForExistingSubscription() {
+    if (Notification.permission != 'granted')
+        return;
+    navigator.serviceWorker.ready.then(function(swr) {
+        swr.pushManager.getSubscription().then(function(ps) {
+            if (!ps) return;
+            setPushSubscription(ps);
+        });
+    });
+}
+
+function setPushSubscription(ps) {
+    // If both subscribeForPush and lookForExistingSubscription call this,
+    // ignore the second call.
+    if (pushSubscription) return;
+    pushSubscription = ps;
+    console.log(ps);
+    $('#subscribe').style.display = 'none';
 }
