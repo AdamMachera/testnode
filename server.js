@@ -12,6 +12,16 @@ var app = express();
 
 var jsonParser = bodyParser.json();
 
+// Force SSL except when running on localhost.
+var localhostRegex = /^(127\.[\d.]+|\[[0:]+1\]|localhost)$/i;
+app.use(function(req, res, next) {
+    if (req.header('X-Forwarded-Proto') !== 'https' &&
+            !localhostRegex.test(req.hostname)) {
+        return res.redirect(['https://', req.header('Host'), req.url].join(''));
+    }
+    return next();
+});
+
 app.set('port', (process.env.PORT || 5000));
 
 app.use(express.static(__dirname + '/public'));
