@@ -58,7 +58,7 @@ app.post('/send', jsonParser, function(req, res) {
         requestOptions.headers.Authorization = 'key=' + process.env.GCM_API_KEY;
     }
     request.post(requestOptions, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
+        if (!error && 200 <= response.statusCode && response.statusCode < 300) {
             res.sendStatus(202);
         } else {
             // TODO: This is useful for debugging, but should make sure this
