@@ -73,11 +73,7 @@ function setPushSubscription(ps) {
     $('#send').style.display = 'block';
 }
 
-$('#send > form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    console.log("Sending message to " + location.hostname + "...");
-    $('#error').style.display = 'none';
-
+function postNotificationTo(url, callback) {
     var data = {
         endpoint: pushSubscription.endpoint,
         curve25519dh: btoa(String.fromCharCode.apply(
@@ -91,15 +87,36 @@ $('#send > form').addEventListener('submit', function(event) {
         if (('' + xhr.status)[0] != '2') {
             error("Server error " + xhr.status + ": " + xhr.statusText);
         } else {
-            console.log("Sent successfully :)");
+            callback(xhr);
         }
     };
     xhr.onerror = xhr.onabort = function() {
-        error("Failed to send message to server!");
+        error("Failed to communicate with server!");
     };
-    xhr.open('POST', '/send');
+    xhr.open('POST', url);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify(data));
+}
+
+$('#send > form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    console.log("Sending message to " + location.hostname + "...");
+    $('#error').style.display = 'none';
+    $('#curl').style.display = 'none';
+
+    postNotificationTo('/send', function(xhr) {
+        console.log("Sent successfully :)");
+    });
+});
+
+$('#curl-button').addEventListener('click', function(event) {
+    $('#error').style.display = 'none';
+    $('#curl').style.display = 'none';
+
+    postNotificationTo('/curl', function(xhr) {
+        $('#curl > pre > code').textContent = xhr.responseText;
+        $('#curl').style.display = 'block';
+    });
 });
 
 $('button#unsubscribe').addEventListener('click', function(event) {

@@ -20,3 +20,16 @@ form > * > * {
 	display: table-cell;
 	vertical-align: middle;
 }
+
+#curl-button {
+	margin-left: 5px;
+}
+
+#curl {
+	display: none;
+}
+#curl > pre {
+	white-space: pre-wrap;
+	background-color: #eee;
+	padding: 1em;
+}

@@ -33,11 +33,16 @@ app.get('/manifest.json', function(req, res) {
     });
 });
 
-app.post('/send', jsonParser, function(req, res) {
-    if (!req.body) return res.sendStatus(400);
+function prepareWebpushRequest(req, res) {
+    if (!req.body) {
+        res.sendStatus(400);
+        return false;
+    }
     for (var prop of ['endpoint', 'curve25519dh', 'title', 'body']) {
-        if (!req.body.hasOwnProperty(prop))
-            return res.status(400).send("Missing " + prop);
+        if (!req.body.hasOwnProperty(prop)) {
+            res.status(400).send("Missing " + prop);
+            return false;
+        }
     }
     var encrypted = webpush.encrypt({
         peerPublic: new Buffer(req.body.curve25519dh, 'base64'),
@@ -68,15 +73,34 @@ app.post('/send', jsonParser, function(req, res) {
     if (endpoint.indexOf(GCM_WEBPUSH_PREFIX) === 0) {
         requestOptions.headers.Authorization = 'key=' + process.env.GCM_API_KEY;
     }
+    return requestOptions;
+}
+
+app.post('/send', jsonParser, function(req, res) {
+    var requestOptions = prepareWebpushRequest(req, res);
+    if (!requestOptions)
+        return;
     request.post(requestOptions, function(error, response, body) {
         if (!error && 200 <= response.statusCode && response.statusCode < 300) {
             res.sendStatus(202);
         } else {
-            // TODO: This is useful for debugging, but should make sure this
-            // doesn't leak sensitive data like the GCM_API_KEY to users.
             res.status(500).send(util.format(error, response, body));
         }
     });
+});
+
+app.post('/curl', jsonParser, function(req, res) {
+    var requestOptions = prepareWebpushRequest(req, res);
+    if (!requestOptions)
+        return;
+    var cmd = util.format("PAYLOAD=$(echo '%s' | base64 --decode);\ncurl",
+                          requestOptions.body.toString('base64'));
+    Object.keys(requestOptions.headers).sort().forEach(function(headerName) {
+        cmd += util.format(" -H '%s: %s'",
+                           headerName, requestOptions.headers[headerName]);
+    });
+    cmd += util.format(" --data-binary \"$PAYLOAD\" %s", requestOptions.url);
+    res.send(cmd);
 });
 
 app.listen(app.get('port'), function() {
