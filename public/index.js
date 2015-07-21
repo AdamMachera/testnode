@@ -43,6 +43,7 @@ function onClickSubscribe() {
 function subscribeForPush() {
     navigator.serviceWorker.ready.then(function(swr) {
         swr.pushManager.subscribe({userVisibleOnly: true}).then(function(ps) {
+            console.log("Subscribed successfully");
             setPushSubscription(ps);
         }, function(reason) {
             error("Failed to subscribe for Push: " + reason);
@@ -99,4 +100,16 @@ $('#send > form').addEventListener('submit', function(event) {
     xhr.open('POST', '/send');
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify(data));
+});
+
+$('button#unsubscribe').addEventListener('click', function(event) {
+    if (!pushSubscription)
+        return;
+    pushSubscription.unsubscribe().then(function() {
+        console.log("Unsubscribed successfully");
+        pushSubscription = null;
+        $('#send').style.display = 'none';
+        $('#subscribe').style.display = 'block';
+        $('#subscribe > button').disabled = false;
+    });
 });
