@@ -1,4 +1,5 @@
 var assert = require('assert');
+var base64url = require('base64-url');
 var bodyParser = require('body-parser');
 var express = require('express');
 var request = require('request');
@@ -53,11 +54,11 @@ app.post('/send', jsonParser, function(req, res) {
         url: endpoint,
         headers: {
             'Encryption': util.format('salt="%s"; rs=%s',
-                                      encrypted.salt.toString('base64'),
+                                      base64url.encode(encrypted.salt),
                                       encrypted.rs),
             'Encryption-Key': util.format('dh="%s"',
-                                          encrypted.localPublic.toString(
-                                                  'base64')),
+                                          base64url.encode(
+                                                  encrypted.localPublic)),
         },
         body: encrypted.ciphertext
     };
