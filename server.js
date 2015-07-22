@@ -44,8 +44,13 @@ function prepareWebpushRequest(req, res) {
             return false;
         }
     }
+    var curve25519dh = new Buffer(req.body.curve25519dh, 'base64');
+    if (curve25519dh.length != 32) {
+        res.status(400).send("Invalid curve25519dh");
+        return false;
+    }
     var encrypted = webpush.encrypt({
-        peerPublic: new Buffer(req.body.curve25519dh, 'base64'),
+        peerPublic: curve25519dh,
         plaintext: new Buffer(JSON.stringify({
             title: req.body.title,
             body: req.body.body
@@ -83,6 +88,10 @@ app.post('/send', jsonParser, function(req, res) {
     request.post(requestOptions, function(error, response, body) {
         if (!error && 200 <= response.statusCode && response.statusCode < 300) {
             res.sendStatus(202);
+        } else if (body && body.indexOf('InvalidTokenFormat') !== -1) {
+            res.status(400).send("Invalid endpoint. Chrome users might need " +
+                                 "the flag --gcm-registration-url=" +
+                                 "https://jmt17.google.com/c2dm/register3");
         } else {
             res.status(500).send(util.format(error, response, body));
         }

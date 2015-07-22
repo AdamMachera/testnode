@@ -46,8 +46,14 @@ function subscribeForPush() {
             console.log("Subscribed successfully");
             setPushSubscription(ps);
         }, function(reason) {
-            error("Failed to subscribe for Push: " + reason);
-            $('#subscribe > button').disabled = false;
+            if (reason.message.indexOf("permission denied") !== -1 &&
+                    /Chrome\/4[23]\./.test(navigator.userAgent)) {
+                error("This demo requires a more recent browser version " +
+                      "(see https://goo.gl/mppTHW).");
+            } else {
+                error("Failed to subscribe for Push: " + reason);
+                $('#subscribe > button').disabled = false;
+            }
         });
     });
 }
@@ -69,6 +75,15 @@ function setPushSubscription(ps) {
     if (pushSubscription) return;
     pushSubscription = ps;
     console.log(ps);
+    if (!pushSubscription.curve25519dh) {
+        error("Your browser does not yet support the curve25519dh parameter " +
+              "needed for this webpush demo to send encrypted messages. If " +
+              "you're sure you have a recent enough build, check that you " +
+              "passed the right command line flags (after killing any " +
+              "existing instances of the browser, including in the systray).");
+        ps.unsubscribe();
+        return;
+    }
     $('#subscribe').style.display = 'none';
     $('#send').style.display = 'block';
 }
@@ -85,7 +100,8 @@ function postNotificationTo(url, callback) {
     var xhr = new XMLHttpRequest();
     xhr.onload = function() {
         if (('' + xhr.status)[0] != '2') {
-            error("Server error " + xhr.status + ": " + xhr.statusText);
+            error("Server error " + xhr.status + ": " + (xhr.responseText ||
+                                                         xhr.statusText));
         } else {
             callback(xhr);
         }
